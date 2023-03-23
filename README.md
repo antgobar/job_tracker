@@ -4,12 +4,12 @@ An ETL pipeline app which fetches job data from [USAJOBS](https://developer.usaj
 
 ## Brief
 * ETL script querying USAJOBS API
-  * Search using `data engineering` keyword
-  * Prase data for results of interest to a job-seeker based in Chigago IL with 5 years
+  * Search using the `data engineering` keyword
+  * Prase data for results of interest to a job-seeker based in Chicago IL with 5 years
 of experience
   * At least the fields: 
-`PositionTitle`, `PositionURI` , `PositionLocation` , `PositionRemuneration`
-* Load parsed results into user database
+`PositionTitle`, `PositionURI`, `PositionLocation`, `PositionRemuneration`
+* Load parsed results into the mongo database
 
 ## Running this application
 This application was created using `docker version 20` and `docker compose version 2`
@@ -18,11 +18,11 @@ This application was created using `docker version 20` and `docker compose versi
 the ETL pipeline with the `update_jobs` endpoint
   * Default parameters match project brief requirements
 * View current stored jobs with the `/stored_jobs` endpoint
-* Alternatively open port `8081` to view the mogngo UI (mongoexpress) 
+* Alternatively open port `8081` to view the mongo UI (mongo express) 
 using `mexpress` for username and password
 
 ## App design
-* FastAPI used as the main interface to trigger ETL pipeline and viewing current database contents
+* FastAPI used as the main interface to trigger the ETL pipeline and view current database contents
 * Using the `requests` library to query the Jobs API provider
 * Passing in various query parameters e.g. location, job keyword, remuneration
 * Parse response and use dataclass to enforce record schema for ingestion by MongoDB
@@ -33,7 +33,7 @@ using `mexpress` for username and password
 Since this application would be triggered on a regular schedule e.g. daily
 a serverless approach is more ideal than a continuous runtime, at least if the
 processing and ETL loads are relatively small
-* CI/CD pipeline using GitHub actions to test application and on success
+* CI/CD pipeline using GitHub actions to test the application, and on success
 publish docker image to AWS ECR
 * Build an AWS Lambda function from this image
 * Use AWS EventBridge to trigger the Lambda on a regular schedule
