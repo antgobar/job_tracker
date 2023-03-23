@@ -2,10 +2,10 @@ from pymongo import MongoClient, UpdateOne
 from pymongo.collection import Collection, UpdateOne
 
 
-def jobs_collection(uri: str, db: str, collection: str) -> Collection:
-    client = MongoClient('mongodb://root:password@localhost:27017/')
-    db = client["job_tracker"]
-    return db["jobs"]
+def mongo_collection(uri: str, db: str, collection: str) -> Collection:
+    client = MongoClient(uri)
+    database = client[db]
+    return database[collection]
 
 
 def get_ids(jobs: list, id_field: str) -> list:
@@ -18,6 +18,6 @@ def upsert_operations(jobs: list[dict], ids_to_update: list[str]) -> list[Update
     ]
 
 
-def collection_bulk_write(collection, operations):
+def collection_bulk_write(collection: Collection, operations: list[UpdateOne]):
     result = collection.bulk_write(operations)
     return result.bulk_api_result

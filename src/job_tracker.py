@@ -3,6 +3,7 @@ import os
 from env import env
 from api import USAJobApi
 from jobs import Jobs
+from db import mongo_collection
 
 
 if __name__ == "__main__":
