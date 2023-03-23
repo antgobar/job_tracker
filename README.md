@@ -14,11 +14,11 @@ of experience
 ## Running this application
 This application was created using `docker version 20` and `docker compose version 2`
 * Run the application with `./run.sh` (you may need to update permissions with `chmod +x run.sh`)
-* Open port `8000` on your browser to view the FastAPI interface and trigger 
-the ETL pipeline with the `update_jobs` endpoint
+* Open your browser on `localhost:8000/docs` to view the Swagger interface and trigger 
+the ETL pipeline with the `/update_jobs` endpoint
   * Default parameters match project brief requirements
 * View current stored jobs with the `/stored_jobs` endpoint
-* Alternatively open port `8081` to view the mongo UI (mongo express) 
+* Alternatively got to port `8081` to view the mongo UI (mongo express) 
 using `mexpress` for username and password
 
 ## App design
