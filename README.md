@@ -12,8 +12,8 @@ of experience
 * Load parsed results into the mongo database
 
 ## Running this application
-This application was created using `docker version 20` and `docker compose version 2`
-Make sure you create a `.env` file in the root directory with the keys `API_USER=<your USAJobAPI username>` and `API_KEY=<your api key>`
+This application was created using `docker version 20` and `docker compose version 2`  
+**Make sure you create a `.env` file in the root directory with the keys `API_USER=<your USAJobAPI username>` and `API_KEY=<your api key>`**
 * Run the application with `./run.sh` (you may need to update permissions with `chmod +x run.sh`)
 * Open your browser on `localhost:8000/docs` to view the Swagger interface and trigger 
 the ETL pipeline with the `/update_jobs` endpoint
