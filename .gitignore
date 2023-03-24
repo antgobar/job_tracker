@@ -109,7 +109,7 @@ venv/
 job_tracker/env/
 env.bak/
 venv.bak/
-
+.idea/
 # Spyder project settings
 .spyderproject
 .spyproject
