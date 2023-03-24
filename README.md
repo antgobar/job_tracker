@@ -27,6 +27,8 @@ using `mexpress` for username and password
 * Using the `requests` library to query the Jobs API provider
 * Passing in various query parameters e.g. location, job keyword, remuneration
 * Parse response and use dataclass to enforce record schema for ingestion by MongoDB
+* MongoDB is used here because multiple tables with relationships are not being created
+for simple ETL a NoSQL approach is appropriate
 * User `upsert` operation with bulk write to mongo to update existing or insert new records
 * Return results of upsert operation to view records added or modified
 
