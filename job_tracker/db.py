@@ -10,17 +10,17 @@ from bson import ObjectId
 from pymongo import MongoClient
 from pymongo.collection import Collection, UpdateOne
 
-from config import Config
+from job_tracker.config import Config
 
 
-def mongo_collection(db: str, collection: str) -> Collection:
+def mongo_collection(client, db: str, collection: str) -> Collection:
     """
     Wrapper returning a mongo collection
+    :param client: mongo singleton class
     :param db:
     :param collection:
     :return: mongo collection
     """
-    client = MongoDb()
     database = client[db]
     return database[collection]
 
@@ -31,10 +31,10 @@ class MongoDb:
     """
     _instance = None
 
-    def __new__(cls, app=None):
+    def __new__(cls, uri=Config.MONGO_URI):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-        cls._instance = MongoClient(Config.MONGO_URI)
+        cls._instance = MongoClient(uri)
         return cls._instance
 
 
@@ -42,8 +42,8 @@ class UpsertDocs:
     """
     Upsert class to run upsert operation in mongodb
     """
-    def __init__(self, db: str, collection: str):
-        self.collection = mongo_collection(db, collection)
+    def __init__(self, client, db: str, collection: str):
+        self.collection = mongo_collection(client, db, collection)
 
     def upsert(self, documents: list[dict], id_field: str):
         """

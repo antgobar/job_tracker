@@ -2,17 +2,17 @@
 Local interface for job tracker. Triggers job API calls and mongodb upsert operations
 """
 
-from jobs import Jobs, USAJobApi
-from db import UpsertDocs
-from config import Config
+from job_tracker.jobs import Jobs, USAJobApi
+from job_tracker.db import UpsertDocs, MongoDb
+from job_tracker.config import Config
 
 
-def track_jobs(location: str, key_word: str, min_pay: int):
+def track_jobs(db_client, location: str, keyword: str, min_pay: int):
     """
     Main interface for job tracker
-
+    :param db_client: database client e.g. mongo
     :param location:
-    :param key_word:
+    :param keyword:
     :param min_pay:
     :return: query and database operation results
     """
@@ -22,7 +22,7 @@ def track_jobs(location: str, key_word: str, min_pay: int):
         api_key=Config.API_KEY
     )
     jobs = Jobs(
-        api=api, location=location, key_word=key_word, min_pay=min_pay
+        api=api, location=location, keyword=keyword, min_pay=min_pay
     )
 
     jobs_data = jobs.job_data()
@@ -31,7 +31,7 @@ def track_jobs(location: str, key_word: str, min_pay: int):
     if job_count == 0:
         return {"query_job_count": 0, "results": None}
 
-    upserter = UpsertDocs("job_tracker", "jobs")
+    upserter = UpsertDocs(db_client, "job_tracker", "jobs")
 
     return {
         "query_job_count": job_count,
@@ -40,11 +40,11 @@ def track_jobs(location: str, key_word: str, min_pay: int):
 
 
 if __name__ == "__main__":
-    Config.MONGO_URI = "mongodb://root:password@localhost:27017/"
-
+    client = MongoDb("mongodb://root:password@localhost:27017/")
     results = track_jobs(
+        db_client=client,
         location="Chicago, Illinois",
-        key_word="data engineering",
+        keyword="data engineering",
         min_pay=10000
     )
     print(results)

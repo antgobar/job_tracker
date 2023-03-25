@@ -7,10 +7,12 @@ Two routes:
 
 from fastapi import FastAPI
 
-from tracker import track_jobs
-from db import mongo_collection, parse_mongo
+from job_tracker.tracker import track_jobs
+from job_tracker.db import MongoDb, mongo_collection, parse_mongo
+
 
 app = FastAPI()
+client = MongoDb()
 
 
 @app.get("/")
@@ -21,13 +23,21 @@ async def root():
 @app.get("/update_jobs")
 async def update_jobs(
         location: str | None = "Chicago, Illinois",
-        key_word: str | None = "data engineering",
+        keyword: str | None = "data engineering",
         min_pay: int | None = 100_000
 ):
-    return track_jobs(location, key_word, min_pay)
+    return track_jobs(client, location, keyword, min_pay)
 
 
 @app.get("/stored_jobs")
 async def stored_jobs():
-    jobs_collection = mongo_collection("job_tracker", "jobs")
-    return parse_mongo(list(jobs_collection.find()))
+    jobs_collection = mongo_collection(client, "job_tracker", "jobs")
+    return {
+        "total_jobs": jobs_collection.count_documents({}),
+        "jobs": parse_mongo(list(jobs_collection.find()))
+    }
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

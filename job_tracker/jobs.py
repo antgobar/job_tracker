@@ -5,9 +5,10 @@ Interface with jobs API and Extraction and Transformations of ETL
 import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
-from dataclasses import dataclass
 
 import requests
+
+from job_tracker.models import JobData
 
 
 logging.basicConfig(level=logging.INFO)
@@ -27,25 +28,6 @@ class JobApi(ABC):
         raise NotImplementedError
 
 
-@dataclass
-class JobData:
-    """
-    Dataclass defining record schema
-    """
-    job_id: str
-    position: str
-    locations: list
-    organisation: str
-    department: str
-    grade: str
-    remuneration_range: tuple
-    start_date: str
-    duration_months: str
-    duration_days: str
-    close_date: str
-    link: str
-
-
 class USAJobApi(JobApi):
     """
     API client for USAJob API
@@ -53,23 +35,23 @@ class USAJobApi(JobApi):
     """
     def __init__(self, base_url: str, api_user: str, api_key: str) -> None:
         self.base_url = base_url
-        self.headers = {
+        self._headers = {
             "User-Agent": api_user,
             "Authorization-Key": api_key
         }
 
-    def search_jobs(self, location: str, role: str, key_word: str, min_pay: int, max_pay: int) -> list:
+    def search_jobs(self, location: str, role: str, keyword: str, min_pay: int, max_pay: int) -> list:
         """
         API caller passing in various parameters to the http request
         :param location:
         :param role:
-        :param key_word:
+        :param keyword:
         :param min_pay:
         :param max_pay:
         :return:
         """
         params = {
-            "keyword": key_word,
+            "keyword": keyword,
             "LocationName": location,
             "PositionTitle": role,
             "RemunerationMinimumAmount": min_pay,
@@ -78,16 +60,19 @@ class USAJobApi(JobApi):
         }
         logging.info(f"Query with params: {params}")
 
-        response = requests.get(self.base_url, headers=self.headers, params=params)
+        response = requests.get(self.base_url, headers=self._headers, params=params)
         if response.status_code != 200:
             raise ConnectionError(f"Could not connect to API: {self.base_url}")
 
-        logging.info(f"Response: {response.status_code}")
+        response.raise_for_status()
         return response.json()["SearchResult"]["SearchResultItems"]
 
     @staticmethod
-    def _parse_remuneration(remuneration_field: dict) -> tuple:
-        return remuneration_field["MinimumRange"], remuneration_field["MaximumRange"]
+    def _parse_remuneration(remuneration_field: dict) -> dict:
+        return {
+            "min": remuneration_field["MinimumRange"],
+            "max": remuneration_field["MaximumRange"]
+        }
 
     @staticmethod
     def _parse_locations(location_field, searched_location):
@@ -95,16 +80,14 @@ class USAJobApi(JobApi):
             [location["LocationName"] for location in location_field if searched_location in location["LocationName"]]
         )
 
-    @staticmethod
-    def _parse_duration(start_date: str, end_date: str) -> tuple:
-        start = datetime.strptime(start_date, "%Y-%m-%dT%H:%M:%S.%f")
-        end = datetime.strptime(end_date, "%Y-%m-%dT%H:%M:%S.%f")
-        month_diff = (end.year - start.year) * 12
-        total_month_diff = month_diff + end.month - start.month
-        return total_month_diff, end.day - start.day
+    def _parse_duration(self, start_date: str, end_date: str) -> int:
+        start = datetime.strptime(self._parse_dates(start_date), "%Y-%m-%d")
+        end = datetime.strptime(self._parse_dates(end_date), "%Y-%m-%d")
+        difference = end - start
+        return difference.days
 
     @staticmethod
-    def _parse_dates(full_datetime) -> str:
+    def _parse_dates(full_datetime: str) -> str:
         return full_datetime.split("T")[0]
 
     def job_details(self, job: dict, location: str):
@@ -114,25 +97,19 @@ class USAJobApi(JobApi):
         :param location:
         :return: structured record
         """
-        job_info = job["MatchedObjectDescriptor"]
-        duration_months, duration_days = self._parse_duration(
-            job_info["PositionStartDate"],
-            job_info["PositionEndDate"]
-        )
-
+        job = job["MatchedObjectDescriptor"]
         return JobData(
-            job["MatchedObjectId"],
-            job_info["PositionTitle"],
-            list(self._parse_locations(job_info["PositionLocation"], location)),
-            job_info["OrganizationName"],
-            job_info["DepartmentName"],
-            job_info["JobGrade"][0]["Code"],
-            self._parse_remuneration(job_info["PositionRemuneration"][0]),
-            job_info["PositionStartDate"].split("T")[0],
-            duration_months,
-            duration_days,
-            job_info["ApplicationCloseDate"].split("T")[0],
-            job_info["PositionURI"]
+            job["PositionID"],
+            job["PositionTitle"],
+            list(self._parse_locations(job["PositionLocation"], location)),
+            job["OrganizationName"],
+            job["DepartmentName"],
+            job["JobGrade"][0]["Code"],
+            self._parse_remuneration(job["PositionRemuneration"][0]),
+            self._parse_dates(job["PositionStartDate"]),
+            self._parse_duration(job["PositionStartDate"], job["PositionEndDate"]),
+            self._parse_dates(job["ApplicationCloseDate"]),
+            job["PositionURI"]
         )
 
 
@@ -144,21 +121,25 @@ class Jobs:
             self,
             api: JobApi,
             location: str = None,
-            key_word: str = None,
+            keyword: str = None,
             role: str = None,
             min_pay: int = None,
             max_pay: int = None
     ) -> None:
         self.api = api
         self.location = location
-        self.key_word = key_word
+        self.keyword = keyword
         self.role = role
         self.min_pay = min_pay
         self.max_pay = max_pay
 
     def _find_jobs(self):
         return self.api.search_jobs(
-            self.location, self.key_word, self.role, self.min_pay, self.max_pay
+            location=self.location,
+            keyword=self.keyword,
+            role=self.role,
+            min_pay=self.min_pay,
+            max_pay=self.max_pay
         )
 
     def job_data(self):
