@@ -14,6 +14,9 @@ RUN poetry config virtualenvs.create false
 RUN poetry install --only main
 
 FROM build as run
+RUN useradd -r -s /bin/bash app_user
+RUN chown -R app_user:app_user /${LAMBDA_TASK_ROOT}
+USER app_user
 
 ARG MONGO_URI
 ARG API_USER
@@ -31,4 +34,4 @@ ENV AWS_DEFAULT_REGION $AWS_DEFAULT_REGION
 
 COPY --from=build /${LAMBDA_TASK_ROOT}/job_tracker/ /${LAMBDA_TASK_ROOT}/job_tracker/
 
-CMD ["python", "job_tracker.tracker.handler"]
+CMD ["uvicorn", "job_tracker.app:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

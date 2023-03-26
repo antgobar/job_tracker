@@ -6,12 +6,14 @@ Two routes:
 """
 
 from fastapi import FastAPI
+from mangum import Mangum
 
 from job_tracker.tracker import track_jobs
 from job_tracker.db import MongoDb, mongo_collection, parse_mongo
 
 
 app = FastAPI()
+handler = Mangum(app)
 client = MongoDb()
 
 
@@ -36,8 +38,3 @@ async def stored_jobs():
         "total_jobs": jobs_collection.count_documents({}),
         "jobs": parse_mongo(list(jobs_collection.find()))
     }
-
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0")
