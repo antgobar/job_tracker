@@ -31,4 +31,4 @@ ENV AWS_DEFAULT_REGION $AWS_DEFAULT_REGION
 
 COPY --from=build /${LAMBDA_TASK_ROOT}/job_tracker/ /${LAMBDA_TASK_ROOT}/job_tracker/
 
-CMD ["uvicorn", "job_tracker.app:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["python", "job_tracker.tracker"]

@@ -1,10 +1,14 @@
 """
 Local interface for job tracker. Triggers job API calls and mongodb upsert operations
 """
+import logging
 
 from job_tracker.jobs import Jobs, USAJobApi
 from job_tracker.db import UpsertDocs, MongoDb
 from job_tracker.config import Config
+
+
+logging.basicConfig(level=logging.INFO)
 
 
 def track_jobs(db_client, location: str, keyword: str, min_pay: int):
@@ -39,12 +43,16 @@ def track_jobs(db_client, location: str, keyword: str, min_pay: int):
     }
 
 
-if __name__ == "__main__":
-    client = MongoDb("mongodb://root:password@localhost:27017/")
-    results = track_jobs(
+def handler(event, context):
+    client = MongoDb()
+    return track_jobs(
         db_client=client,
         location="Chicago, Illinois",
         keyword="data engineering",
         min_pay=10000
     )
-    print(results)
+
+
+if __name__ == "__main__":
+    results = handler(None, None)
+    logging.info(results)
