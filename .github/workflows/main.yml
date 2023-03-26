@@ -11,8 +11,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-20.04
-    env:
-      ECR_IMAGE_TAG: latest
+
     strategy:
       matrix:
         python-version: ["3.10"]
@@ -85,7 +84,4 @@ jobs:
         run: |
           aws lambda update-function-code \
           --function-name ${{ env.AWS_LAMBDA_FUNC_NAME }} \
-          --image-uri "${{ secrets.AWS_ECR_IMAGE_URI }}:${{ env.IMAGE_TAG }}"
-        env:
-          AWS_LAMBDA_FUNC_NAME: job_tracker
-          IMAGE_NAME: job_tracker
+          --image-uri 241885534888.dkr.ecr.eu-west-2.amazonaws.com/job_tracker:latest
