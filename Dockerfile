@@ -6,7 +6,7 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 COPY job_tracker /app/job_tracker
-COPY pyproject.toml poetry.lock .env /app/
+COPY pyproject.toml poetry.lock /app/
 
 RUN pip install --upgrade pip
 RUN pip install poetry==1.4.1
