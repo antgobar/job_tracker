@@ -51,8 +51,3 @@ def handler(event, context):
         keyword="data engineering",
         min_pay=10000
     )
-
-
-if __name__ == "__main__":
-    results = handler(None, None)
-    logging.info(results)

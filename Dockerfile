@@ -31,4 +31,4 @@ ENV AWS_DEFAULT_REGION $AWS_DEFAULT_REGION
 
 COPY --from=build /${LAMBDA_TASK_ROOT}/job_tracker/ /${LAMBDA_TASK_ROOT}/job_tracker/
 
-CMD ["python", "job_tracker.handler"]
+CMD ["python", "job_tracker.tracker.handler"]
