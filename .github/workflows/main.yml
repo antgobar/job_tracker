@@ -58,7 +58,7 @@ jobs:
           APP_VERSION=$(sed -n '/^\[tool.poetry\]/,/^$/p' pyproject.toml | grep "version" | cut -d '"' -f 2)
           COMMIT_HASH=$(echo ${GITHUB_SHA} | cut -c1-7)
           IMAGE_TAG=${APP_VERSION}-${COMMIT_HASH}
-          
+          echo "$IMAGE_TAG=IMAGE_TAG" >> GITHUB_ENV
           docker build \
             --build-arg API_USER="${{ secrets.API_USER }}" \
             --build-arg API_KEY="${{ secrets.API_KEY }}" \
@@ -85,8 +85,7 @@ jobs:
         run: |
           aws lambda update-function-code \
           --function-name ${{ env.AWS_LAMBDA_FUNC_NAME }} \
-          --image-uri "${{ secrets.AWS_ECR_IMAGE_URI }}:latest"
+          --image-uri "${{ secrets.AWS_ECR_IMAGE_URI }}:${{ env.IMAGE_TAG }}"
         env:
           AWS_LAMBDA_FUNC_NAME: job_tracker
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_NAME: job_tracker
