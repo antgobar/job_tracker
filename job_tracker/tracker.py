@@ -39,6 +39,10 @@ def track_jobs(db_client, location: str, keyword: str, min_pay: int):
     }
 
 
+def handler(event, context):
+    ...
+
+
 if __name__ == "__main__":
     client = MongoDb("mongodb://root:password@localhost:27017/")
     results = track_jobs(
