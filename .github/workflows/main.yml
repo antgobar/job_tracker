@@ -11,7 +11,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-20.04
-
+    env:
+      ECR_IMAGE_TAG: latest
     strategy:
       matrix:
         python-version: ["3.10"]
@@ -84,7 +85,7 @@ jobs:
         run: |
           aws lambda update-function-code \
           --function-name ${{ env.AWS_LAMBDA_FUNC_NAME }} \
-          --image-uri "${{ env.ECR_REGISTRY }}/$IMAGE_NAME:latest}}"
+          --image-uri "${{ secrets.AWS_ECR_IMAGE_URI }}:latest"
         env:
           AWS_LAMBDA_FUNC_NAME: job_tracker
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
