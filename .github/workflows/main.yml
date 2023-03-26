@@ -29,17 +29,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install poetry
           poetry install
+
       - name: Test with pytest
         run: |
           poetry run pytest
+
       - name: checkout
         uses: actions/checkout@v2
 
-      - name: Set tag envs
-        run: |
-          COMMIT_HASH=$(git rev-parse HEAD)
-          APP_VERSION=$(sed -n '/^\[tool.poetry\]/,/^$/p' pyproject.toml | grep "version" | cut -d '"' -f 2)
-          IMAGE_TAG=$APP_VERSION-${COMMIT_HASH:0:7}
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -55,9 +52,11 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: job_tracker
+          IMAGE_NAME: job_tracker
         run: |
-          echo $IMAGE_TAG
+          APP_VERSION=$(sed -n '/^\[tool.poetry\]/,/^$/p' pyproject.toml | grep "version" | cut -d '"' -f 2)
+          COMMIT_HASH=$(echo ${GITHUB_SHA} | cut -c1-7)
+          IMAGE_TAG=${APP_VERSION}-${COMMIT_HASH}
           docker build \
             --build-arg API_USER="${{ secrets.API_USER }}" \
             --build-arg API_KEY="${{ secrets.API_KEY }}" \
@@ -65,9 +64,9 @@ jobs:
             --build-arg AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" \
             --build-arg AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
             --build-arg AWS_DEFAULT_REGION="${{ secrets.AWS_DEFAULT_REGION }}" \
-            -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
+            -t $ECR_REGISTRY/$IMAGE_NAME:latest .
+          docker push $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
+          echo "::set-output name=image::$ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG"
 
 #      - name: Deploy to AWS Lambda
 #        run: |
