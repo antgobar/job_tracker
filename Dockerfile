@@ -1,12 +1,12 @@
-FROM python:3.10.2-slim-buster as build
-WORKDIR /app
+FROM public.ecr.aws/lambda/python:3.10 as build
+WORKDIR /${LAMBDA_TASK_ROOT}
 
-ENV PYTHONPATH "${PYTHONPATH}:/app/job_tracker"
+ENV PYTHONPATH "${PYTHONPATH}:/${LAMBDA_TASK_ROOT}/job_tracker"
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-COPY job_tracker /app/job_tracker
-COPY pyproject.toml poetry.lock /app/
+COPY job_tracker /${LAMBDA_TASK_ROOT}/job_tracker
+COPY pyproject.toml poetry.lock /${LAMBDA_TASK_ROOT}/
 
 RUN pip install --upgrade pip
 RUN pip install poetry==1.4.1
@@ -15,7 +15,7 @@ RUN poetry install --only main
 
 FROM build as run
 RUN useradd -r -s /bin/bash app_user
-RUN chown -R app_user:app_user /app
+RUN chown -R app_user:app_user /${LAMBDA_TASK_ROOT}
 USER app_user
 
 ARG MONGO_URI
@@ -32,6 +32,6 @@ ENV AWS_ACCESS_KEY_ID $AWS_ACCESS_KEY_ID
 ENV AWS_SECRET_ACCESS_KEY $AWS_SECRET_ACCESS_KEY
 ENV AWS_DEFAULT_REGION $AWS_DEFAULT_REGION
 
-COPY --from=build /app/job_tracker/ /app/job_tracker/
+COPY --from=build /${LAMBDA_TASK_ROOT}/job_tracker/ /${LAMBDA_TASK_ROOT}/job_tracker/
 
-CMD ["uvicorn", "job_tracker.etl:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["uvicorn", "job_tracker.app:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

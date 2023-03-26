@@ -6,12 +6,14 @@ Two routes:
 """
 
 from fastapi import FastAPI
+from mangum import Mangum
 
 from job_tracker.tracker import track_jobs
 from job_tracker.db import MongoDb, mongo_collection, parse_mongo
 
 
 app = FastAPI()
+handler = Mangum(app)
 client = MongoDb()
 
 
