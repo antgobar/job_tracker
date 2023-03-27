@@ -17,11 +17,11 @@ app = FastAPI()
 handler = Mangum(app)
 client = MongoDb()
 
-
-logging.basicConfig(level=logging.INFO)
-
-results = track_jobs(client, "Chicago, Illinois", "data engineering", 100_000)
-logging.info(results)
+#
+# logging.basicConfig(level=logging.INFO)
+#
+# results = track_jobs(client, "Chicago, Illinois", "data engineering", 100_000)
+# logging.info(results)
 
 
 @app.get("/")
@@ -49,4 +49,4 @@ async def stored_jobs():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=9000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
