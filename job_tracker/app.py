@@ -14,6 +14,7 @@ from job_tracker.tracker import track_jobs
 from job_tracker.db import MongoDb, mongo_collection, parse_mongo
 from job_tracker.config import Config
 
+
 description = """
 JobTracker API helps you keep up to date with the latest
 job adverts on the USAJob site. 
@@ -51,9 +52,10 @@ async def etl(
         keyword: str | None = "data engineering",
         min_pay: int | None = 100_000
 ):
-
-    # return track_jobs(client, location, keyword, min_pay)
-    return {"test": "this"}
+    try:
+        return track_jobs(client, location, keyword, min_pay)
+    except Exception as e:
+        return {"exception": str(e)}
 
 
 @app.get("/jobs")
@@ -78,12 +80,7 @@ async def wipe():
         return {"exception": str(e)}
 
 
-#
-# if __name__ == "__main__":
-#     import uvicorn
-#     logging.basicConfig(level=logging.INFO)
-#
-#     results = track_jobs(client, "Chicago, Illinois", "data engineering", 100_000)
-#     logging.info(results)
-#
-#     uvicorn.run(app, host="0.0.0.0")
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    results = track_jobs(client, "Chicago, Illinois", "data engineering", 100_000)
+    logging.info(results)
