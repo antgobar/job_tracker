@@ -43,10 +43,7 @@ client = MongoDb()
 
 @app.get("/")
 async def root():
-    return {
-        "message": "Hello Tasman",
-        "config": Config.MONGO_URI
-    }
+    return {"message": "Hello Tasman"}
 
 
 @app.put("/etl")
@@ -56,9 +53,10 @@ async def etl(
         min_pay: int | None = 100_000
 ):
     try:
-        return track_jobs(client, location, keyword, min_pay)
+        results = track_jobs(client, location, keyword, min_pay)
     except Exception as e:
-        return {"exception": str(e)}
+        return {"exception": "excepted"}
+    return results
 
 
 @app.get("/jobs")

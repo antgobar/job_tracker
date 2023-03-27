@@ -8,7 +8,7 @@ services:
       - "8000:8000"
     command: uvicorn job_tracker.app:app --host 0.0.0.0 --port 8000 --reload
     environment:
-      MONGO_URI: "mongodb+srv://antonmongo:tk4BttNC3jJh5fm@cluster0.w2qsk7g.mongodb.net/?retryWrites=true&w=majority"
+      MONGO_URI: "mongodb://root:password@mongo:27017"
     env_file:
       - .env
     depends_on:
