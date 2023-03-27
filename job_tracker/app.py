@@ -11,7 +11,7 @@ from mangum import Mangum
 
 from job_tracker.tracker import track_jobs
 from job_tracker.db import MongoDb, mongo_collection, parse_mongo
-
+from job_tracker.config import Config
 
 app = FastAPI()
 handler = Mangum(app)
@@ -26,7 +26,10 @@ client = MongoDb()
 
 @app.get("/")
 async def root():
-    return {"message": "Hello Tasman"}
+    return {
+        "message": "Hello Tasman",
+        "test": Config.MONGO_URI
+    }
 
 
 @app.get("/update_jobs")
@@ -49,4 +52,5 @@ async def stored_jobs():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0")
+
