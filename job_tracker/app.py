@@ -39,6 +39,7 @@ app = FastAPI(
 
 handler = Mangum(app)
 client = MongoDb(Config.MONGO_URI)
+jobs_collection = mongo_collection(client, "job_tracker", "jobs")
 
 
 @app.get("/")
@@ -52,15 +53,17 @@ async def etl(
         keyword: str | None = "data engineering",
         min_pay: int | None = 100_000
 ):
-    try:
-        return track_jobs(client, location, keyword, min_pay)
-    except Exception as e:
-        return {"exception": str(e)}
+    # try:
+    #     return track_jobs(client, location, keyword, min_pay)
+    # except Exception as e:
+    #     return {"exception": str(e)}
+    jobs_collection.insert_one({"testing": "this"})
+    return {"inserted": "something"}
 
 
 @app.get("/jobs")
 async def jobs():
-    jobs_collection = mongo_collection(client, "job_tracker", "jobs")
+
     try:
         return {
             "total_jobs": jobs_collection.count_documents({}),
@@ -72,7 +75,6 @@ async def jobs():
 
 @app.delete("/wipe")
 async def wipe():
-    jobs_collection = mongo_collection(client, "job_tracker", "jobs")
     result = jobs_collection.delete_many({})
     try:
         return {"deleted": result.deleted_count}
