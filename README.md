@@ -37,7 +37,7 @@ for simple ETL a NoSQL approach is appropriate
 * Pipeline using GitHub actions to test the application, build a docker image
 push it to AWS ECR and create an AWS Lambda from the image
 * The docker container has access to a Mongo Atlas cluster
-* (My) lambda function is available here https://s5ybntl5ns36qxvh3uvddxs64u0nemes.lambda-url.eu-west-2.on.aws/
+* Contact me to view the live Lambda
 
 ## Secrets
 Include the following secrets if you want to deploy this yourself
