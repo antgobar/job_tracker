@@ -14,9 +14,6 @@ RUN poetry config virtualenvs.create false
 RUN poetry install --only main
 
 FROM build as run
-RUN useradd -r -s /bin/bash app_user
-RUN chown -R app_user:app_user /${LAMBDA_TASK_ROOT}
-USER app_user
 
 ARG MONGO_URI
 ARG API_USER

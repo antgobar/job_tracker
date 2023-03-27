@@ -4,6 +4,7 @@ Two routes:
 /update_jobs triggers the ETL pipeline and upserts moongodb and returns results on the upsert operation
 /stored_jobs returns the jobs currently in mongodb
 """
+import logging
 
 from fastapi import FastAPI
 from mangum import Mangum
@@ -15,6 +16,11 @@ from job_tracker.db import MongoDb, mongo_collection, parse_mongo
 app = FastAPI()
 handler = Mangum(app)
 client = MongoDb()
+
+
+logging.basicConfig(level=logging.INFO)
+
+track_jobs(client, "Chicago, Illinois", "data engineering", 100_000)
 
 
 @app.get("/")
