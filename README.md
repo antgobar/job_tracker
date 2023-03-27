@@ -36,24 +36,37 @@ for simple ETL a NoSQL approach is appropriate
 ## CI/CD
 * Pipeline using GitHub actions to test the application, build a docker image
 push it to AWS ECR and create an AWS Lambda from the image
+* The docker container has access to a Mongo Atlas cluster
+* (My) lambda function is available here https://s5ybntl5ns36qxvh3uvddxs64u0nemes.lambda-url.eu-west-2.on.aws/
 
-## Ideas for implementing cloud deployment
+## Secrets
+Include the following secrets if you want to deploy this yourself
+* `API_KEY`: Jobs API key
+* `API_USER`: Jobs API user
+* `AWS_ACCESS_KEY_ID`
+* `AWS_DEFAULT_REGION`
+* `AWS_ECR_IMAGE_URI`
+* `AWS_SECRET_ACCESS_KEY`
+* `MONGO_URI`: e.g. Mongo Alass connection URI
+
+
+## Further ideas for implementing cloud deployment
 Since this application would be triggered on a regular schedule e.g. daily
 a serverless approach is more ideal than a continuous runtime, at least if the
 processing and ETL loads are relatively small
 * Use AWS EventBridge to trigger the Lambda on a regular schedule
-* Using AWS DocumentDB as an analogue to MongoDB (or Mongo Atlas)
-* IaC approach could be cloud formation to provision updated Lambda during
-the triggering of the CI/CD pipeline
+* Email user updated jobs report
+* Using AWS DocumentDB as an analogue to MongoDb
+* IaC approach could be cloud formation to provision Lambda and EventBridge rules during CI/CD
 
 ## Other considerations:
 * For an application which requires higher throughput this approach may not
-be optimal. 
+be optimal. E.g. I had to increase the Lambda memory allocation
 * In this case a more scalable solution could be to scale the AWS lambdas
 * Or implement a continuous runtime approach such as Kubernetes for horizontal scaling with replica sets
+or AWS ECS architecture
 * Eventually IO bottlenecks with MongoDB will need handling with sharding for example
 
 ## Future state ...
 * Analytics: Extend user API interface to display results on dashboards
-* Testing: thorough unit testing with pytest, especially for Transformation steps in `jobs.py`, as 
-well as end-to-end tests for ETL
+* Further testing to include `db.py` unittests
