@@ -35,6 +35,8 @@ app = FastAPI(
     description=description,
     version="0.1.0",
 )
+
+
 handler = Mangum(app)
 client = MongoDb()
 
@@ -43,7 +45,6 @@ client = MongoDb()
 async def root():
     return {
         "message": "Hello Tasman",
-
     }
 
 
@@ -53,26 +54,33 @@ async def etl(
         keyword: str | None = "data engineering",
         min_pay: int | None = 100_000
 ):
-    response = track_jobs(client, location, keyword, min_pay)
-    return {"jobs": "updated"}
+    try:
+        return track_jobs(client, location, keyword, min_pay)
+    except Exception as e:
+        return {"exception": str(e)}
 
 
 @app.get("/jobs")
 async def jobs():
     jobs_collection = mongo_collection(client, "job_tracker", "jobs")
-    response = {
-        "total_jobs": jobs_collection.count_documents({}),
-        "jobs": parse_mongo(list(jobs_collection.find()))
-    }
-    return {"retreived": "jobs"}
+    try:
+        return {
+            "total_jobs": jobs_collection.count_documents({}),
+            "jobs": parse_mongo(list(jobs_collection.find()))
+        }
+    except Exception as e:
+        return {"exception": str(e)}
 
 
 @app.delete("/wipe")
 async def wipe():
     jobs_collection = mongo_collection(client, "job_tracker", "jobs")
     result = jobs_collection.delete_many({})
-    response = {"deleted": result.deleted_count}
-    return {"deleted": "documents"}
+    try:
+        return {"deleted": result.deleted_count}
+    except Exception as e:
+        return {"exception": str(e)}
+
 
 #
 # if __name__ == "__main__":
