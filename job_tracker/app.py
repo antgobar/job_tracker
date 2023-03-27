@@ -13,7 +13,7 @@ from mangum import Mangum
 
 from job_tracker.tracker import track_jobs
 from job_tracker.db import MongoDb, mongo_collection, parse_mongo
-
+from job_tracker.config import Config
 
 description = """
 JobTracker API helps you keep up to date with the latest
@@ -45,6 +45,7 @@ client = MongoDb()
 async def root():
     return {
         "message": "Hello Tasman",
+        "config": Config.MONGO_URI
     }
 
 
