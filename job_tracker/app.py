@@ -20,7 +20,8 @@ client = MongoDb()
 
 logging.basicConfig(level=logging.INFO)
 
-track_jobs(client, "Chicago, Illinois", "data engineering", 100_000)
+results = track_jobs(client, "Chicago, Illinois", "data engineering", 100_000)
+logging.info(results)
 
 
 @app.get("/")
@@ -44,3 +45,8 @@ async def stored_jobs():
         "total_jobs": jobs_collection.count_documents({}),
         "jobs": parse_mongo(list(jobs_collection.find()))
     }
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=9000)
