@@ -1,7 +1,9 @@
 version: "3.8"
 services:
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: DockerfileLocal
     ports:
       - "8000:8000"
     command: uvicorn job_tracker.app:app --host 0.0.0.0 --port 8000 --reload
