@@ -16,11 +16,12 @@ This application was created using `docker version 20` and `docker compose versi
 **Make sure you create a `.env` file in the root directory with the keys `API_USER=<your USAJobAPI username>` and `API_KEY=<your api key>`**
 * Run the application with `./run.sh` (you may need to update permissions with `chmod +x run.sh`)
 * Open your browser on `localhost:8000/docs` to view the Swagger interface and trigger 
-the ETL pipeline with the `/update_jobs` endpoint
+the ETL pipeline with the `/etl` endpoint
   * Default parameters match project brief requirements
-* View current stored jobs with the `/stored_jobs` endpoint
+* View current stored jobs with the `/jobs` endpoint
 * Alternatively got to port `8081` to view the mongo UI (mongo express) 
 using `mexpress` for username and password
+* Wipe the collection with `/wipe`
 
 ## App design
 * FastAPI used as the main interface to trigger the ETL pipeline and view current database contents
