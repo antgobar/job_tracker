@@ -15,7 +15,7 @@ from job_tracker.config import Config
 
 app = FastAPI()
 handler = Mangum(app)
-client = MongoDb()
+client = MongoDb(Config.MONGO_URI)
 
 #
 # logging.basicConfig(level=logging.INFO)
@@ -28,7 +28,7 @@ client = MongoDb()
 async def root():
     return {
         "message": "Hello Tasman",
-        "test": Config.MONGO_URI
+
     }
 
 
