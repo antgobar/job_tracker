@@ -10,8 +10,6 @@ from bson import ObjectId
 from pymongo import MongoClient
 from pymongo.collection import Collection, UpdateOne
 
-from job_tracker.config import Config
-
 
 def mongo_collection(client, db: str, collection: str) -> Collection:
     """
@@ -31,7 +29,7 @@ class MongoDb:
     """
     _instance = None
 
-    def __new__(cls, uri=Config.MONGO_URI):
+    def __new__(cls, uri):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         cls._instance = MongoClient(uri)

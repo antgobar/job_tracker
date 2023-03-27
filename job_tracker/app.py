@@ -8,7 +8,6 @@ import logging
 import json
 
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse
 from mangum import Mangum
 
 from job_tracker.tracker import track_jobs
@@ -38,7 +37,7 @@ app = FastAPI(
 
 
 handler = Mangum(app)
-client = MongoDb()
+client = MongoDb(Config.MONGO_URI)
 
 
 @app.get("/")
@@ -52,11 +51,9 @@ async def etl(
         keyword: str | None = "data engineering",
         min_pay: int | None = 100_000
 ):
-    try:
-        results = track_jobs(client, location, keyword, min_pay)
-    except Exception as e:
-        return {"exception": "excepted"}
-    return results
+
+    # return track_jobs(client, location, keyword, min_pay)
+    return {"test": "this"}
 
 
 @app.get("/jobs")

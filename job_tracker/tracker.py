@@ -4,7 +4,7 @@ Local interface for job tracker. Triggers job API calls and mongodb upsert opera
 import logging
 
 from job_tracker.jobs import Jobs, USAJobApi
-from job_tracker.db import UpsertDocs, MongoDb
+from job_tracker.db import UpsertDocs
 from job_tracker.config import Config
 
 
