@@ -39,18 +39,16 @@ async def update_jobs(
         keyword: str | None = "data engineering",
         min_pay: int | None = 100_000
 ):
-    return JSONResponse(track_jobs(client, location, keyword, min_pay))
+    return track_jobs(client, location, keyword, min_pay)
 
 
 @app.get("/stored_jobs")
 async def stored_jobs():
     jobs_collection = mongo_collection(client, "job_tracker", "jobs")
-    return JSONResponse(
-        {
-            "total_jobs": jobs_collection.count_documents({}),
-            "jobs": parse_mongo(list(jobs_collection.find()))
-        }
-    )
+    return {
+        "total_jobs": jobs_collection.count_documents({}),
+        "jobs": parse_mongo(list(jobs_collection.find()))
+    }
 
 
 @app.delete("/wipe")

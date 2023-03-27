@@ -32,13 +32,14 @@ for simple ETL a NoSQL approach is appropriate
 * User `upsert` operation with bulk write to mongo to update existing or insert new records
 * Return results of upsert operation to view records added or modified
 
+## CI/CD
+* Pipeline using GitHub actions to test the application, build a docker image
+push it to AWS ECR and create an AWS Lambda from the image
+
 ## Ideas for implementing cloud deployment
 Since this application would be triggered on a regular schedule e.g. daily
 a serverless approach is more ideal than a continuous runtime, at least if the
 processing and ETL loads are relatively small
-* CI/CD pipeline using GitHub actions to test the application, and on success
-publish docker image to AWS ECR
-* Build an AWS Lambda function from this image
 * Use AWS EventBridge to trigger the Lambda on a regular schedule
 * Using AWS DocumentDB as an analogue to MongoDB (or Mongo Atlas)
 * IaC approach could be cloud formation to provision updated Lambda during
