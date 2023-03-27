@@ -109,7 +109,8 @@ class USAJobApi(JobApi):
             self._parse_dates(job["PositionStartDate"]),
             self._parse_duration(job["PositionStartDate"], job["PositionEndDate"]),
             self._parse_dates(job["ApplicationCloseDate"]),
-            job["PositionURI"]
+            job["PositionURI"],
+            datetime.now()
         )
 
 

@@ -4,7 +4,7 @@ Local interface for job tracker. Triggers job API calls and mongodb upsert opera
 import logging
 
 from job_tracker.jobs import Jobs, USAJobApi
-from job_tracker.db import UpsertDocs
+from job_tracker.db import ManageDocs
 from job_tracker.config import Config
 
 
@@ -30,14 +30,12 @@ def track_jobs(db_client, location: str, keyword: str, min_pay: int):
     )
 
     jobs_data = jobs.job_data()
-    job_count = len(jobs_data)
+    found_jobs = len(jobs_data)
 
-    if job_count == 0:
+    if found_jobs == 0:
         return {"query_job_count": 0, "results": None}
 
-    upserter = UpsertDocs(db_client, "job_tracker", "jobs")
+    manager = ManageDocs(db_client, "job_tracker", "jobs")
+    updated = manager.deduplicate(jobs_data, "job_id")
 
-    return {
-        "query_job_count": job_count,
-        "results": upserter.upsert(jobs_data, "job_id")
-    }
+    return {"found": found_jobs, **updated}

@@ -6,9 +6,13 @@ import json
 from datetime import datetime
 from typing import Any
 from bson import ObjectId
+import logging
 
-from pymongo import MongoClient
-from pymongo.collection import Collection, UpdateOne
+from pymongo import MongoClient, DESCENDING
+from pymongo.collection import Collection
+
+
+logging.basicConfig(level=logging.INFO)
 
 
 def mongo_collection(client, db: str, collection: str) -> Collection:
@@ -36,61 +40,59 @@ class MongoDb:
         return cls._instance
 
 
-class UpsertDocs:
+class ManageDocs:
     """
     Upsert class to run upsert operation in mongodb
     """
     def __init__(self, client, db: str, collection: str):
         self.collection = mongo_collection(client, db, collection)
 
-    def upsert(self, documents: list[dict], id_field: str):
-        """
-        Applies upsert on a list of documents and reference id values
-
-        :param documents:
-        :param id_field:
-        :return: results of bulk write operation
-        """
-        ids = self.get_ids(documents, id_field)
-        operations = self.upsert_operations(documents, ids, id_field)
-        return self.collection_bulk_write(self.collection, operations)
-
     @staticmethod
-    def get_ids(documents: list, id_field: str) -> list:
-        """
-        Extracts id fields from documents
-
-        :param documents:
-        :param id_field:
-        :return: id values
-        """
-        return [doc[id_field] for doc in documents]
-
-    @staticmethod
-    def upsert_operations(documents: list[dict], ids: list[str], id_field) -> list:
-        """
-        Collates upsert operations into a single object
-
-        :param documents:
-        :param ids:
-        :param id_field:
-        :return: upsert operation list
-        """
-        return [
-            UpdateOne({id_field: id_}, {"$set": new_doc}, upsert=True) for id_, new_doc in zip(ids, documents)
+    def find_duplicates(collection, id_field):
+        pipeline = [
+            {
+                "$sort": {
+                    "fetched": DESCENDING
+                }
+            },
+            {
+                "$group": {
+                    "_id": {f"{id_field}": f"${id_field}"},
+                    "unique_ids": {"$addToSet": "$_id"},
+                    "count": {"$sum": 1}
+                }
+            },
+            {
+                "$match": {
+                    "count": {"$gt": 1}
+                }
+            },
+            {
+                "$project": {
+                    "ids_to_delete": {"$slice": ["$unique_ids", 1, {"$size": "$unique_ids"}]}
+                }
+            }
         ]
 
-    @staticmethod
-    def collection_bulk_write(collection: Collection, operations: list) -> dict:
-        """
-        Bulk write operation in mongodb
+        results = list(collection.aggregate(pipeline))
+        return [ObjectId(d) for doc in results for d in doc["ids_to_delete"]]
 
-        :param collection:
-        :param operations:
-        :return: parsed results of bulk write operation
-        """
-        result = collection.bulk_write(operations)
-        return parse_mongo(result.bulk_api_result)
+    @staticmethod
+    def delete_duplicates(collection, duplicate_refs: list):
+        result = collection.delete_many({"_id": {"$in": duplicate_refs}})
+        return result.deleted_count
+
+    def deduplicate(self, documents: list, id_field: str) -> dict:
+        results = self.collection.insert_many(documents)
+        duplicates = self.find_duplicates(self.collection, id_field)
+        inserted_document_ids = results.inserted_ids
+        return {
+            "inserted": len(inserted_document_ids),
+            "updated": self.delete_duplicates(self.collection, duplicates),
+            "results": parse_mongo(
+                list(self.collection.find({"_id": {"$in": inserted_document_ids}}))
+            )
+        }
 
 
 def parse_mongo(result):

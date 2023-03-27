@@ -5,9 +5,8 @@ Two routes:
 /stored_jobs returns the jobs currently in mongodb
 """
 import logging
-import json
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from mangum import Mangum
 
 from job_tracker.tracker import track_jobs
@@ -53,12 +52,10 @@ async def etl(
         keyword: str | None = "data engineering",
         min_pay: int | None = 100_000
 ):
-    # try:
-    #     return track_jobs(client, location, keyword, min_pay)
-    # except Exception as e:
-    #     return {"exception": str(e)}
-    jobs_collection.insert_one({"testing": "this"})
-    return {"inserted": "something"}
+    try:
+        return track_jobs(client, location, keyword, min_pay)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/jobs")
@@ -70,7 +67,7 @@ async def jobs():
             "jobs": parse_mongo(list(jobs_collection.find()))
         }
     except Exception as e:
-        return {"exception": str(e)}
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.delete("/wipe")
@@ -79,7 +76,7 @@ async def wipe():
     try:
         return {"deleted": result.deleted_count}
     except Exception as e:
-        return {"exception": str(e)}
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 if __name__ == "__main__":

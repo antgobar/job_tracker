@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 
 
 @dataclass
@@ -17,3 +18,4 @@ class JobData:
     duration_days: int
     close_date: str
     link: str
+    fetched: datetime

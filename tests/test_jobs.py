@@ -1,4 +1,5 @@
 from unittest.mock import patch, MagicMock
+from datetime import datetime
 
 import pytest
 
@@ -69,7 +70,11 @@ class TestUSAJobApi:
     def test_parse_dates(self, test_api_instance):
         assert test_api_instance._parse_dates("2023-01-01T12345") == "2023-01-01"
 
-    def test_job_details(self, test_api_instance):
+    @patch("job_tracker.jobs.datetime")
+    @patch("job_tracker.jobs.USAJobApi._parse_duration")
+    def test_job_details(self, mock_duration, mock_datetime, test_api_instance):
+        mock_duration.return_value = 3
+        mock_datetime.now.return_value = datetime(2023, 1, 4)
         test_job = {
             "MatchedObjectDescriptor": {
                 "PositionID": "id",
@@ -83,7 +88,6 @@ class TestUSAJobApi:
                 "PositionEndDate": "2023-01-04T1234",
                 "ApplicationCloseDate": "2023-01-02T1234",
                 "PositionURI": "abc123"
-
             }
         }
 
@@ -100,7 +104,8 @@ class TestUSAJobApi:
             "2023-01-01",
             3,
             "2023-01-02",
-            "abc123"
+            "abc123",
+            datetime(2023, 1, 4)
         )
 
 
