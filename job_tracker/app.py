@@ -36,7 +36,6 @@ app = FastAPI(
 )
 
 
-handler = Mangum(app)
 client = MongoDb(Config.MONGO_URI)
 jobs_collection = mongo_collection(client, "job_tracker", "jobs")
 
@@ -77,6 +76,9 @@ async def wipe():
         return {"deleted": result.deleted_count}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+handler = Mangum(app)
 
 
 if __name__ == "__main__":
